@@ -92,7 +92,7 @@ class DoubanTopicPeople(DateTimeMixin):
         verbose_name_plural = verbose_name = 'douban-topic-people'
         unique_together = (('people', 'to'), )
 
-    topic = models.CharField(verbose_name='topic')
+    topic = models.CharField(verbose_name='topic', max_length=255)
     origin = models.CharField(verbose_name='origin', max_length=255)
     people = models.CharField(verbose_name='people', max_length=255)
     to = models.CharField(verbose_name='to', max_length=255)

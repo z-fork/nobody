@@ -73,7 +73,7 @@ DOWNLOADER_MIDDLEWARES = {
     # 'crawler.contrib.middleware.proxies.RotateHttpProxyMiddleware': 755,
 }
 
-DUPEFILTER_CLASS = 'crawler.spiders.base.RFPDupeFilter'
+DUPEFILTER_CLASS = 'crawler.contrib.dupefilter.RFPDupeFilter'
 
 USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; rv:32.0) Gecko/20100101 Firefox/32.0'
 

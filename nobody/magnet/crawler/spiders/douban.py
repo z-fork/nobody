@@ -89,4 +89,3 @@ class JoinsGroupCrawler(BaseCrawler):
                 'people': people,
                 'group': page
             })
-

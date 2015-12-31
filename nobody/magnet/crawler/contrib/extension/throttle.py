@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from scrapy.contrib.throttle import AutoThrottle
 from scrapy.exceptions import NotConfigured
 from scrapy import signals
 
+from proxies.utils import add_or_update
+
 
 class CustomThrottle(AutoThrottle):
-
     def __init__(self, crawler):
         try:
             super(CustomThrottle, self).__init__(crawler)
@@ -20,16 +23,21 @@ class CustomThrottle(AutoThrottle):
             crawler.signals.connect(self._response_downloaded, signal=signals.response_downloaded)
 
     def _spider_opened(self, spider):
-        self.mindelay = self._min_delay(spider)
-        self.maxdelay = self._max_delay(spider)
-        spider.download_delay = self._start_delay(spider)
+        spider.download_delay = 0
 
-    def _start_delay(self, spider):
-        return max(self.mindelay, self.crawler.settings.getfloat('AUTOTHROTTLE_START_DELAY', 0.5))
+    def _response_downloaded(self, response, request, spider):
+        key, slot = self._get_slot(request, spider)
+        latency = request.meta.get('download_latency') * 1000
+        proxy = request.meta.get('proxy')
 
-    def _adjust_delay(self, slot, latency, response):
-        super(CustomThrottle, self)._adjust_delay(slot, latency, response)
+        if latency is None or slot is None or proxy is None:
+            return
 
-        # if response.status == 500:
-        #     new_delay = min(slot.delay*2, self.maxdelay)
-        #     slot.delay = new_delay
+        if self.debug:
+            size = len(response.body)
+            conc = len(slot.transferring)
+            msg = "slot: %s | conc: %2d | latency:%5d ms | size: %6d bytes | proxy:%s" \
+                  % (key, conc, latency, size, proxy)
+            spider.log(msg, level=logging.DEBUG)
+
+        add_or_update(proxy, latency)
